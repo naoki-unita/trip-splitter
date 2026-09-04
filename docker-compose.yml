@@ -1,0 +1,10 @@
+services:
+  trip-splitter:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_EXCHANGE_API_KEY: ${NEXT_PUBLIC_EXCHANGE_API_KEY:-}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
