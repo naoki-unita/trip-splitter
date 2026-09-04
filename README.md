@@ -20,6 +20,8 @@
 
 ```bash
 npm install
+cp .env.example .env.local
+# .env.local に NEXT_PUBLIC_EXCHANGE_API_KEY=xxxx を設定してから
 npm run dev
 # http://localhost:3000
 ```

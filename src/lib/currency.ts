@@ -2,12 +2,10 @@ import { CurrencyCode, RateTable } from "./types";
 
 // 課題で推奨されている exchangerate.host は現在、無料利用でも
 // access_key (要登録) が必須になっている。そこで:
-//  1. .env.local に NEXT_PUBLIC_EXCHANGE_API_KEY があれば exchangerate.host を使う
-//  2. 無ければ frankfurter.app (ECB公表レート・APIキー不要) にフォールバックする
-// という2段構成にして、「APIキーが無くても動くデモ」を担保している。
+// .env.local に NEXT_PUBLIC_EXCHANGE_API_KEY があれば exchangerate.host を使う
+// なければ等倍で換算する
 
 const EXCHANGE_HOST_BASE = "https://api.exchangerate.host";
-const FRANKFURTER_BASE = "https://api.frankfurter.app";
 
 export const SUPPORTED_CURRENCIES: CurrencyCode[] = [
   "JPY",
@@ -44,16 +42,7 @@ async function fetchFromExchangeHost(base: CurrencyCode): Promise<RateTable | nu
   }
 }
 
-async function fetchFromFrankfurter(base: CurrencyCode): Promise<RateTable | null> {
-  try {
-    const res = await fetch(`${FRANKFURTER_BASE}/latest?from=${base}`);
-    if (!res.ok) return null;
-    const json = await res.json();
-    return { base, rates: json.rates, fetchedAt: Date.now() };
-  } catch {
-    return null;
-  }
-}
+
 
 export async function getRateTable(base: CurrencyCode): Promise<RateTable> {
   if (cache && cache.base === base && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
@@ -61,7 +50,7 @@ export async function getRateTable(base: CurrencyCode): Promise<RateTable> {
   }
 
   const fromHost = await fetchFromExchangeHost(base);
-  const table = fromHost ?? (await fetchFromFrankfurter(base));
+  const table = fromHost
 
   if (table) {
     cache = table;
